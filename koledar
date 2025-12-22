@@ -47,11 +47,16 @@ class Koledar(ctk.CTk):
 
         if mesec == 2 and (leto % 400 == 0 or (leto % 100 != 0 and leto % 4 == 0)):
             # Prestopno leto
-            for i in range(dan, dan + 29):
-                Datum(self.mreza_datumov, i-dan+1).grid(row=i//7 + 1, column=i%7, sticky="nsew")
+            dni_v_mesecu = 29
         else:
-            for i in range(dan, dan + self.dnevi_mesecev[mesec-1]):
-                Datum(self.mreza_datumov, i-dan+1).grid(row=i//7 + 1, column=i%7, sticky="nsew")
+            dni_v_mesecu = self.dnevi_mesecev[mesec-1]
+
+        for i in range(dan, dan + dni_v_mesecu):
+            datum = Datum(self.mreza_datumov, i-dan+1)
+            datum.grid(row=i//7 + 1, column=i%7, sticky="nsew")
+            # Nedelje obarvamo drugače
+            if i % 7 == 6:
+                    datum.nastavi_barvo_dneva("Red")
 
 class Header(ctk.CTkFrame):
 
@@ -60,11 +65,11 @@ class Header(ctk.CTkFrame):
 
         self.app = parent
 
+        # Vnosno polje za datum
         self.txt_datum = ctk.CTkLabel(self, text="Vnesi natančen datum v formatu DD/MM/LLLL\n in nato pritisni gumb ali enter: ")
         self.txt_datum.grid(row=0, column=0, padx=5, pady=5)
         self.vnos_datum = ctk.CTkEntry(self)
         self.vnos_datum.grid(row=0, column=1, padx=5, pady=5)
-
         self.vnos_gumb1 = ctk.CTkButton(
             self,
             text="Pojdi na datum",
@@ -72,18 +77,19 @@ class Header(ctk.CTkFrame):
         )
         self.vnos_gumb1.grid(row=0, column=2, padx=5, pady=5)
 
+        # Combobox za izbirco mesca
         self.txt_datum = ctk.CTkLabel(self, text="Mesec: ")
         self.txt_datum.grid(row=0, column=3, padx=5, pady=5)
         self.kombo_meseci = ctk.CTkComboBox(self, values=parent.meseci, state="readonly")
         self.kombo_meseci.grid(row=0, column=4, padx=5, pady=5)
         self.kombo_meseci.set(parent.meseci[datetime.now().month - 1])
 
+        # Vnosno polje za izbiro leta
         self.txt_datum = ctk.CTkLabel(self, text="Leto: ")
         self.txt_datum.grid(row=0, column=5, padx=5, pady=5)
         self.vnos_leto = ctk.CTkEntry(self)
         self.vnos_leto.grid(row=0, column=6, padx=5, pady=5)
         self.vnos_leto.insert(0,str(datetime.now().year))
-
         self.vnos_gumb2 = ctk.CTkButton(
             self, 
             text="Potrdi", 
@@ -108,9 +114,6 @@ class Header(ctk.CTkFrame):
             self.vnos_leto.delete(0, ctk.END)
             self.vnos_leto.insert(0, str(leto))
             
-            
-                
-
     def skok_mesec_leto(self):
         vnos = self.vnos_leto.get().strip()
 
@@ -144,14 +147,20 @@ class Datum(ctk.CTkFrame):
     def __init__(self, parent, dan):
         super().__init__(parent, border_width=2, border_color="#7b5cff")
 
+        self.dan = dan
+
         self.columnconfigure(0,weight=1)
         self.rowconfigure(0,weight=1)
 
-        ctk.CTkLabel(self,
+        self.label = ctk.CTkLabel(self,
                      text=str(dan),
                      font=("Arial", 50, "bold"),
                      anchor="center"
-                ).grid(row=0,column=0, sticky="nsew", padx=5, pady=5)
+                )
+        self.label.grid(row=0,column=0, sticky="nsew", padx=5, pady=5)
+    
+    def nastavi_barvo_dneva(self, barva):
+        self.label.configure(text_color=(barva, barva))
 
 if __name__ == "__main__":
     main()
