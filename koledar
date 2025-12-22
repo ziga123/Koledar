@@ -2,3 +2,14 @@ import customtkinter as ctk
 from datetime import datetime
 import time
 
+def main():
+    koledar = Koledar()
+    koledar.mainloop()
+
+class Koledar(ctk.CTk):
+    def __init__(self):
+        super().__init__()
+        self.title("Koledar")
+
+if __name__ == "__main__":
+    main()
