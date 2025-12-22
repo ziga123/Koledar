@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from datetime import datetime
+from datetime import date
 import time
 
 def main():
@@ -25,11 +26,7 @@ class Koledar(ctk.CTk):
 
         mreza_datumov = MrezaDatumov(self)
         mreza_datumov.grid(row=1,column=0, padx=5, pady=5, sticky="nsew")
-        Datum(mreza_datumov, 1).grid(row=1,column=0, sticky="nsew")
-
-    def generiraj_mesec(self, mesec, leto):
-        pass
-        
+    
 
 class Header(ctk.CTkFrame):
     def __init__(self, parent):
@@ -44,13 +41,18 @@ class Header(ctk.CTkFrame):
         self.txt_datum.grid(row=0,column=2, padx=5, pady=5)
         self.kombo_meseci = ctk.CTkComboBox(self, values=parent.meseci, state="readonly")
         self.kombo_meseci.grid(row=0,column=3, padx=5, pady=5)
+        self.kombo_meseci.set(parent.meseci[datetime.now().month - 1])
 
         self.txt_datum = ctk.CTkLabel(self, text="Leto: ")
         self.txt_datum.grid(row=0,column=4, padx=5, pady=5)
         self.vnos_leto = ctk.CTkEntry(self)
         self.vnos_leto.grid(row=0,column=5, padx=5, pady=5)
+        self.vnos_leto.insert(0,str(datetime.now().year))
 
 class MrezaDatumov(ctk.CTkFrame):
+
+    dnevi_mesecev = [31,28,31,30,31,30,31,31,30,31,30,31]
+
     def __init__(self, parent):
         super().__init__(parent)
         
@@ -64,7 +66,23 @@ class MrezaDatumov(ctk.CTkFrame):
             dan = ctk.CTkLabel(self, text=parent.dnevi_tedna[i])
             dan.grid(row=0, column=i)
 
-        parent.generiraj_mesec()
+        self.generiraj_mesec(datetime.now().month, datetime.now().year)
+
+    def izracunaj_dan(self, dan, mesec, leto):
+        # Vrne kateri dan v tednu je dan/mesec/leto
+        razlika = date.today() - date(leto, mesec, dan)
+        return (time.localtime().tm_wday - razlika.days % 7) % 7
+
+    def generiraj_mesec(self, mesec, leto):
+        dan = self.izracunaj_dan(1, mesec, leto)
+
+        if mesec == 2 and (leto % 400 == 0 or (leto % 100 != 0 and leto % 4 == 0)):
+            # Primer prestopnega leta
+            for i in range(dan, dan + 29):
+                Datum(self, i-dan+1).grid(row=i//7 + 1, column=i%7, sticky="nsew")
+        else:
+            for i in range(dan, dan + self.dnevi_mesecev[mesec-1]):
+                Datum(self, i-dan+1).grid(row=i//7 + 1, column=i%7, sticky="nsew")
 
 class Datum(ctk.CTkFrame):
     def __init__(self, parent, dan):
