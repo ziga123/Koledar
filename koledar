@@ -8,6 +8,7 @@ def main():
 
 class Koledar(ctk.CTk):
 
+    dnevi_tedna = ["Pon", "Tor", "Sre", "Čet", "Pet", "Sob", "Ned"]
     meseci = ["Januar", "Februar", "Marec", "April", "Maj", "Junij", "Julij", "Avgust", "September", "Oktober", "November", "December"]
 
     def __init__(self):
@@ -20,10 +21,15 @@ class Koledar(ctk.CTk):
         self.rowconfigure(1,weight=7)
 
         header = Header(self)
-        header.grid(row=0,column=0, sticky="ew")
+        header.grid(row=0,column=0, padx=5, pady=5, sticky="ew")
 
-    def generiraj_mesec(self):
+        mreza_datumov = MrezaDatumov(self)
+        mreza_datumov.grid(row=1,column=0, padx=5, pady=5, sticky="nsew")
+        Datum(mreza_datumov, 1).grid(row=1,column=0, sticky="nsew")
+
+    def generiraj_mesec(self, mesec, leto):
         pass
+        
 
 class Header(ctk.CTkFrame):
     def __init__(self, parent):
@@ -44,7 +50,34 @@ class Header(ctk.CTkFrame):
         self.vnos_leto = ctk.CTkEntry(self)
         self.vnos_leto.grid(row=0,column=5, padx=5, pady=5)
 
-    
+class MrezaDatumov(ctk.CTkFrame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        
+        for i in range(0,7):
+            self.columnconfigure(i,weight=1)
+            if i != 0:
+                # Vrstica z imenom dni se v višino ne razteza
+                self.rowconfigure(i,weight=1)
+
+        for i in range(0,7):
+            dan = ctk.CTkLabel(self, text=parent.dnevi_tedna[i])
+            dan.grid(row=0, column=i)
+
+        parent.generiraj_mesec()
+
+class Datum(ctk.CTkFrame):
+    def __init__(self, parent, dan):
+        super().__init__(parent, border_width=2, border_color="#7b5cff")
+
+        self.columnconfigure(0,weight=1)
+        self.rowconfigure(0,weight=1)
+
+        ctk.CTkLabel(self, 
+                     text=str(dan), 
+                     font=("Arial", 50, "bold"), 
+                     anchor="center"
+                ).grid(row=0,column=0, sticky="nsew", padx=5, pady=5)
 
 if __name__ == "__main__":
     main()
