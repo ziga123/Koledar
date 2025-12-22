@@ -7,9 +7,44 @@ def main():
     koledar.mainloop()
 
 class Koledar(ctk.CTk):
+
+    meseci = ["Januar", "Februar", "Marec", "April", "Maj", "Junij", "Julij", "Avgust", "September", "Oktober", "November", "December"]
+
     def __init__(self):
         super().__init__()
         self.title("Koledar")
+        self.geometry("1024x768")
+
+        self.columnconfigure(0,weight=1)
+        self.rowconfigure(0, weight=1)
+        self.rowconfigure(1,weight=7)
+
+        header = Header(self)
+        header.grid(row=0,column=0, sticky="ew")
+
+    def generiraj_mesec(self):
+        pass
+
+class Header(ctk.CTkFrame):
+    def __init__(self, parent):
+        super().__init__(parent)
+
+        self.txt_datum = ctk.CTkLabel(self, text="Vnesi natančen datum v formatu DD/MM/LLLL in nato pritisni gumb ali enter: ")
+        self.txt_datum.grid(row=0,column=0, padx=5, pady=5)
+        self.vnos_datum = ctk.CTkEntry(self)
+        self.vnos_datum.grid(row=0,column=1, padx=5, pady=5)
+
+        self.txt_datum = ctk.CTkLabel(self, text="Mesec: ")
+        self.txt_datum.grid(row=0,column=2, padx=5, pady=5)
+        self.kombo_meseci = ctk.CTkComboBox(self, values=parent.meseci, state="readonly")
+        self.kombo_meseci.grid(row=0,column=3, padx=5, pady=5)
+
+        self.txt_datum = ctk.CTkLabel(self, text="Leto: ")
+        self.txt_datum.grid(row=0,column=4, padx=5, pady=5)
+        self.vnos_leto = ctk.CTkEntry(self)
+        self.vnos_leto.grid(row=0,column=5, padx=5, pady=5)
+
+    
 
 if __name__ == "__main__":
     main()
