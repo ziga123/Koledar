@@ -9,53 +9,126 @@ def main():
 
 class Koledar(ctk.CTk):
 
-    dnevi_tedna = ["Pon", "Tor", "Sre", "Čet", "Pet", "Sob", "Ned"]
-    meseci = ["Januar", "Februar", "Marec", "April", "Maj", "Junij", "Julij", "Avgust", "September", "Oktober", "November", "December"]
+    dnevi_tedna = ("Pon", "Tor", "Sre", "Čet", "Pet", "Sob", "Ned")
+    meseci = ("Januar", "Februar", "Marec", "April", "Maj", "Junij", "Julij", "Avgust", "September", "Oktober", "November", "December")
+    dnevi_mesecev = (31,28,31,30,31,30,31,31,30,31,30,31)
 
     def __init__(self):
         super().__init__()
         self.title("Koledar")
-        self.geometry("1024x768")
+        self.geometry("1200x800")
 
         self.columnconfigure(0,weight=1)
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1,weight=7)
 
-        header = Header(self)
-        header.grid(row=0,column=0, padx=5, pady=5, sticky="ew")
+        self.header = Header(self)
+        self.header.grid(row=0,column=0, padx=5, pady=5, sticky="ew")
 
-        mreza_datumov = MrezaDatumov(self)
-        mreza_datumov.grid(row=1,column=0, padx=5, pady=5, sticky="nsew")
-    
+        self.mreza_datumov = MrezaDatumov(self)
+        self.mreza_datumov.grid(row=1,column=0, padx=5, pady=5, sticky="nsew")
+        
+        self.generiraj_mesec(datetime.now().month, datetime.now().year)
+
+
+    def izracunaj_dan(self, dan, mesec, leto):
+        # Vrne kateri dan v tednu je dan/mesec/leto
+        razlika = date.today() - date(leto, mesec, dan)
+        return (time.localtime().tm_wday - razlika.days % 7) % 7
+
+    def generiraj_mesec(self, mesec, leto):
+        # Ni še pravilno obravnavn primer let pred 1584, ko se je nekaj dni izpustilo za prehod iz Julijanskega na Gregorijanski koledar
+
+        dan = self.izracunaj_dan(1, mesec, leto)
+
+        for child in self.mreza_datumov.winfo_children():
+            if isinstance(child, Datum):
+                child.destroy()
+
+        if mesec == 2 and (leto % 400 == 0 or (leto % 100 != 0 and leto % 4 == 0)):
+            # Prestopno leto
+            for i in range(dan, dan + 29):
+                Datum(self.mreza_datumov, i-dan+1).grid(row=i//7 + 1, column=i%7, sticky="nsew")
+        else:
+            for i in range(dan, dan + self.dnevi_mesecev[mesec-1]):
+                Datum(self.mreza_datumov, i-dan+1).grid(row=i//7 + 1, column=i%7, sticky="nsew")
 
 class Header(ctk.CTkFrame):
+
     def __init__(self, parent):
         super().__init__(parent)
 
-        self.txt_datum = ctk.CTkLabel(self, text="Vnesi natančen datum v formatu DD/MM/LLLL in nato pritisni gumb ali enter: ")
-        self.txt_datum.grid(row=0,column=0, padx=5, pady=5)
+        self.app = parent
+
+        self.txt_datum = ctk.CTkLabel(self, text="Vnesi natančen datum v formatu DD/MM/LLLL\n in nato pritisni gumb ali enter: ")
+        self.txt_datum.grid(row=0, column=0, padx=5, pady=5)
         self.vnos_datum = ctk.CTkEntry(self)
-        self.vnos_datum.grid(row=0,column=1, padx=5, pady=5)
+        self.vnos_datum.grid(row=0, column=1, padx=5, pady=5)
+
+        self.vnos_gumb1 = ctk.CTkButton(
+            self,
+            text="Pojdi na datum",
+            command=self.skok_datum
+        )
+        self.vnos_gumb1.grid(row=0, column=2, padx=5, pady=5)
 
         self.txt_datum = ctk.CTkLabel(self, text="Mesec: ")
-        self.txt_datum.grid(row=0,column=2, padx=5, pady=5)
+        self.txt_datum.grid(row=0, column=3, padx=5, pady=5)
         self.kombo_meseci = ctk.CTkComboBox(self, values=parent.meseci, state="readonly")
-        self.kombo_meseci.grid(row=0,column=3, padx=5, pady=5)
+        self.kombo_meseci.grid(row=0, column=4, padx=5, pady=5)
         self.kombo_meseci.set(parent.meseci[datetime.now().month - 1])
 
         self.txt_datum = ctk.CTkLabel(self, text="Leto: ")
-        self.txt_datum.grid(row=0,column=4, padx=5, pady=5)
+        self.txt_datum.grid(row=0, column=5, padx=5, pady=5)
         self.vnos_leto = ctk.CTkEntry(self)
-        self.vnos_leto.grid(row=0,column=5, padx=5, pady=5)
+        self.vnos_leto.grid(row=0, column=6, padx=5, pady=5)
         self.vnos_leto.insert(0,str(datetime.now().year))
+
+        self.vnos_gumb2 = ctk.CTkButton(
+            self, 
+            text="Potrdi", 
+            command=self.skok_mesec_leto
+        )
+        self.vnos_gumb2.grid(row=0, column=7, padx=5, pady=5)
+
+    def skok_datum(self):
+        vnos = self.vnos_datum.get().strip()
+
+        if vnos:
+            try:
+                dan, mesec, leto = map(int, vnos.split("/"))
+                date(leto, mesec, dan)
+            except ValueError:
+                self.vnos_datum.delete(0, ctk.END)
+                return
+            
+            self.app.generiraj_mesec(mesec, leto)
+            self.vnos_datum.delete(0, ctk.END)
+            self.kombo_meseci.set(self.app.meseci[mesec - 1])
+            self.vnos_leto.delete(0, ctk.END)
+            self.vnos_leto.insert(0, str(leto))
+            
+            
+                
+
+    def skok_mesec_leto(self):
+        vnos = self.vnos_leto.get().strip()
+
+        if vnos:
+            try:
+                self.app.generiraj_mesec(
+                    self.app.meseci.index(self.kombo_meseci.get()) + 1, # mesec iz combo boxa
+                    int(self.vnos_leto.get()) # leto iz vnosnega polja
+                )
+            except:
+                self.vnos_leto.delete(0, ctk.END)
+
 
 class MrezaDatumov(ctk.CTkFrame):
 
-    dnevi_mesecev = [31,28,31,30,31,30,31,31,30,31,30,31]
-
     def __init__(self, parent):
         super().__init__(parent)
-        
+
         for i in range(0,7):
             self.columnconfigure(i,weight=1)
             if i != 0:
@@ -66,34 +139,17 @@ class MrezaDatumov(ctk.CTkFrame):
             dan = ctk.CTkLabel(self, text=parent.dnevi_tedna[i])
             dan.grid(row=0, column=i)
 
-        self.generiraj_mesec(datetime.now().month, datetime.now().year)
-
-    def izracunaj_dan(self, dan, mesec, leto):
-        # Vrne kateri dan v tednu je dan/mesec/leto
-        razlika = date.today() - date(leto, mesec, dan)
-        return (time.localtime().tm_wday - razlika.days % 7) % 7
-
-    def generiraj_mesec(self, mesec, leto):
-        dan = self.izracunaj_dan(1, mesec, leto)
-
-        if mesec == 2 and (leto % 400 == 0 or (leto % 100 != 0 and leto % 4 == 0)):
-            # Primer prestopnega leta
-            for i in range(dan, dan + 29):
-                Datum(self, i-dan+1).grid(row=i//7 + 1, column=i%7, sticky="nsew")
-        else:
-            for i in range(dan, dan + self.dnevi_mesecev[mesec-1]):
-                Datum(self, i-dan+1).grid(row=i//7 + 1, column=i%7, sticky="nsew")
-
 class Datum(ctk.CTkFrame):
+
     def __init__(self, parent, dan):
         super().__init__(parent, border_width=2, border_color="#7b5cff")
 
         self.columnconfigure(0,weight=1)
         self.rowconfigure(0,weight=1)
 
-        ctk.CTkLabel(self, 
-                     text=str(dan), 
-                     font=("Arial", 50, "bold"), 
+        ctk.CTkLabel(self,
+                     text=str(dan),
+                     font=("Arial", 50, "bold"),
                      anchor="center"
                 ).grid(row=0,column=0, sticky="nsew", padx=5, pady=5)
 
