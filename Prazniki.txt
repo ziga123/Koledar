@@ -3,4 +3,9 @@ Novo_leto*/2/1/2025
 Prešernov_dan*/8/2/2025
 Velika_noč/20/4/2025
 Velikonočni_ponedeljek/21/4/2025
+Dan_upora_proti_okupatorju*/27/4/2025
+Dan_Primoža_Trubarja*/8/6/2025
+Marijino_vnebovzetje*/15/8/2025
+Dan_reformacije*/31/10/2025
+Dan_spomina_na_mrtve*/1/11/2025
 Božič*/25/12/2025

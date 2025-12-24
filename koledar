@@ -24,10 +24,10 @@ class Koledar(ctk.CTk):
 
         self.columnconfigure(0,weight=1)
         self.rowconfigure(0, weight=1)
-        self.rowconfigure(1,weight=7)
+        self.rowconfigure(1,weight=6)
 
         self.header = Header(self)
-        self.header.grid(row=0,column=0, padx=5, pady=5, sticky="ew")
+        self.header.grid(row=0,column=0, padx=5, pady=5, sticky="nsew")
 
         self.mreza_datumov = MrezaDatumov(self)
         self.mreza_datumov.grid(row=1,column=0, padx=5, pady=5, sticky="nsew")
@@ -35,7 +35,7 @@ class Koledar(ctk.CTk):
         self.generiraj_mesec(datetime.now().month, datetime.now().year)
 
     def generiraj_mesec(self, mesec, leto):
-        # Ni še pravilno obravnavn primer let pred 1584, ko se je nekaj dni izpustilo za prehod iz Julijanskega na Gregorijanski koledar
+        # Ni še obravnavn primer let pred 1584, ko se je nekaj dni izpustilo za prehod iz Julijanskega na Gregorijanski koledar
 
         prazniki = self.get_prazniki()
         dan = self.izracunaj_dan(1, mesec, leto)
@@ -96,40 +96,44 @@ class Header(ctk.CTkFrame):
         super().__init__(parent)
 
         self.app = parent
+        
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(3, weight=1)
 
         # Vnosno polje za datum
-        self.txt_datum = ctk.CTkLabel(self, text="Vnesi natančen datum v formatu DD/MM/LLLL\n in nato pritisni gumb ali enter: ")
-        self.txt_datum.grid(row=0, column=0, padx=5, pady=5)
+        self.txt_datum = ctk.CTkLabel(self, text="Vnesi natančen datum v formatu DD/MM/LLLL: ", font=("Arial", 15), anchor="center")
+        self.txt_datum.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
         self.vnos_datum = ctk.CTkEntry(self)
-        self.vnos_datum.grid(row=0, column=1, padx=5, pady=5)
+        self.vnos_datum.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
         self.vnos_gumb1 = ctk.CTkButton(
             self,
             text="Pojdi na datum",
             command=self.skok_datum
         )
-        self.vnos_gumb1.grid(row=0, column=2, padx=5, pady=5)
+        self.vnos_gumb1.grid(row=0, column=2, padx=5, pady=5, sticky="ew")
 
         # Combobox za izbirco mesca
-        self.txt_datum = ctk.CTkLabel(self, text="Mesec: ")
-        self.txt_datum.grid(row=0, column=3, padx=5, pady=5)
+        self.txt_datum = ctk.CTkLabel(self, text="Mesec: ", font=("Arial", 15), anchor="center")
+        self.txt_datum.grid(row=0, column=4, padx=5, pady=5, sticky="ew")
         self.kombo_meseci = ctk.CTkComboBox(self, values=parent.meseci, state="readonly")
-        self.kombo_meseci.grid(row=0, column=4, padx=5, pady=5)
+        self.kombo_meseci.grid(row=0, column=5, padx=5, pady=5, sticky="ew")
         self.kombo_meseci.set(parent.meseci[datetime.now().month - 1])
 
         # Vnosno polje za izbiro leta
-        self.txt_datum = ctk.CTkLabel(self, text="Leto: ")
-        self.txt_datum.grid(row=0, column=5, padx=5, pady=5)
+        self.txt_datum = ctk.CTkLabel(self, text="Leto: ", font=("Arial", 15), anchor="center")
+        self.txt_datum.grid(row=0, column=6, padx=5, pady=5, sticky="ew")
         self.vnos_leto = ctk.CTkEntry(self)
-        self.vnos_leto.grid(row=0, column=6, padx=5, pady=5)
+        self.vnos_leto.grid(row=0, column=7, padx=5, pady=5, sticky="ew")
         self.vnos_leto.insert(0,str(datetime.now().year))
         self.vnos_gumb2 = ctk.CTkButton(
             self, 
             text="Potrdi", 
             command=self.skok_mesec_leto
         )
-        self.vnos_gumb2.grid(row=0, column=7, padx=5, pady=5)
+        self.vnos_gumb2.grid(row=0, column=8, padx=5, pady=5, sticky="ew")
 
     def skok_datum(self):
+        # Generira ustrezen mesec glede na vnos v formatu DD/MM/LLLL
         vnos = self.vnos_datum.get().strip()
 
         if vnos:
