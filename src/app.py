@@ -26,6 +26,8 @@ class Koledar(ctk.CTk):
         self.generiraj_mesec(datetime.now().month, datetime.now().year)
 
     def generiraj_mesec(self, mesec, leto):
+        # Ni obravnavan primer pred letom 1584, ko se je nekaj dni izpustilo zaradi prehoda iz Julijanskega na Gregorijanski koledar
+
         prazniki = KoledarLogika.get_prazniki()
         dan = KoledarLogika.izracunaj_dan(1, mesec, leto)
         dni_v_mesecu = KoledarLogika.dnevi_v_mesecu(mesec, leto)

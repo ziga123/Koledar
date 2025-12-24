@@ -68,6 +68,7 @@ class Header(ctk.CTkFrame):
         self.err_2.grid(row=2, column=7, padx=5, sticky="ew")
 
     def skok_datum(self):
+        # Skoči na ustrezen mesec v ustreznem letu glede na dani vnos DD/MM/LLLL
         vnos = self.vnos_datum.get().strip()
         if not vnos:
             return
@@ -90,6 +91,7 @@ class Header(ctk.CTkFrame):
         self.vnos_leto.insert(0,str(leto))
 
     def skok_mesec_leto(self):
+        # Skoči na ustrezen mesec v ustreznem letu glede na izbiro meseca v comboboxu in glede na vpisano leto
         try:
             mesec = self.app.meseci.index(self.kombo_meseci.get()) + 1
             leto = int(self.vnos_leto.get())
